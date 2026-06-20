@@ -1,0 +1,15 @@
+
+
+@import "tailwindcss";
+
+@theme {
+  /* Add a custom color */
+  --color-brand-blue: #1e40af;
+  
+  /* Add a custom animation */
+  --animate-fade-in: fade-in 0.5s ease-out;
+  @keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+}
