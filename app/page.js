@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, Key, User, Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import LoginForm from "../components/auth/LoginForm";
+import RegisterForm from "../components/auth/RegisterFrom";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -12,12 +14,16 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
   const [formData, setFormData] = useState({
     name: "",
     username: "",
     email: "",
     password: "",
+    avatar: null, 
   });
+  
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -25,67 +31,85 @@ export default function AuthPage() {
     }
   }, [user, router]);
 
-  const handleAuthSubmit = async (e) => {
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, avatar: file });
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      if (isLogin) {
-        if (!formData.username && !formData.email) {
-          setError("Please enter either a username or an email.");
-          setLoading(false);
-          return;
-        }
+      if (!formData.username && !formData.email) {
+        setError("Please enter either a username or an email.");
+        setLoading(false);
+        return;
+      }
 
-        const result = await login({
-          username: formData.username || undefined,
-          email: formData.email || undefined,
+      const result = await login({
+        username: formData.username || undefined,
+        email: formData.email || undefined,
+        password: formData.password,
+      });
+
+      if (result.success) {
+        router.refresh(); 
+        router.push("/dashboard"); 
+      } else {
+        setError(result.error || "Login failed");
+        setLoading(false);
+      }
+    } catch (err) {
+      setError(err?.message || "Something went wrong");
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const submitData = new FormData();
+      submitData.append("name", formData.name);
+      submitData.append("username", formData.username);
+      submitData.append("email", formData.email);
+      submitData.append("password", formData.password);
+      
+      if (formData.avatar) {
+        submitData.append("avatar", formData.avatar);
+      }
+
+      const res = await fetch("http://localhost:8000/api/v1/users/register", {
+        method: "POST",
+        credentials: "include",
+        body: submitData, 
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Registration failed");
+        setLoading(false); 
+      } else {
+        const autoLogin = await login({
+          username: formData.username,
           password: formData.password,
         });
 
-        if (result.success) {
+        if (autoLogin.success) {
           router.refresh(); 
           router.push("/dashboard"); 
         } else {
-          setError(result.error || "Login failed");
+          setError("Account created successfully! Please log in.");
+          setIsLogin(true);
           setLoading(false);
-        }
-      } else {
-        const res = await fetch("http://localhost:8000/api/v1/users/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            name: formData.name,
-            username: formData.username,
-            email: formData.email,
-            password: formData.password,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(data.message || "Registration failed");
-          setLoading(false); 
-        } else {
-          const autoLogin = await login({
-            username: formData.username,
-            password: formData.password,
-          });
-
-          if (autoLogin.success) {
-          
-            router.refresh(); 
-            router.push("/dashboard"); 
-          } else {
-            setError("Account created successfully! Please log in.");
-            setIsLogin(true);
-            setLoading(false);
-          }
         }
       }
     } catch (err) {
@@ -97,7 +121,8 @@ export default function AuthPage() {
   const toggleAuthMode = () => {
     setError("");
     setIsLogin(!isLogin);
-    setFormData({ name: "", username: "", email: "", password: "" });
+    setFormData({ name: "", username: "", email: "", password: "", avatar: null });
+    setAvatarPreview(null);
   };
 
   if (user) {
@@ -135,120 +160,23 @@ export default function AuthPage() {
             </div>
           )}
 
-          <form className="space-y-4" onSubmit={handleAuthSubmit}>
-            {!isLogin && (
-              <>
-                <div className="relative group">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white/60 text-slate-900 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                  />
-                </div>
-
-                <div className="relative group">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  <input
-                    type="text"
-                    placeholder="Username"
-                    required
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white/60 text-slate-900 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                  />
-                </div>
-
-                <div className="relative group">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white/60 text-slate-900 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                  />
-                </div>
-              </>
-            )}
-
-            {isLogin && (
-              <>
-                <div className="relative group">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  <input
-                    type="text"
-                    placeholder="Username"
-                    required={!formData.email} 
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value, email: "" })}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white/60 text-slate-900 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                  />
-                </div>
-
-                <div className="relative flex py-1 items-center">
-                  <div className="flex-grow border-t border-slate-200"></div>
-                  <span className="shrink-0 px-4 text-slate-400 text-xs font-bold uppercase tracking-widest">OR</span>
-                  <div className="flex-grow border-t border-slate-200"></div>
-                </div>
-
-                <div className="relative group">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    required={!formData.username} 
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value, username: "" })}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white/60 text-slate-900 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="relative group pt-2">
-              <Key size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors mt-1" />
-              <input
-                type="password"
-                placeholder="Password"
-                required
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full pl-11 pr-4 py-3.5 bg-white/60 text-slate-900 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-              />
-            </div>
-
-            {isLogin && (
-              <div className="flex justify-end pt-1">
-                <a href="#" className="text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors">
-                  Forgot password?
-                </a>
-              </div>
-            )}
-
-            <div className="pt-2">
-              <button
-                disabled={loading}
-                type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-[0_8px_20px_rgba(37,99,235,0.25)] transform active:scale-[0.98] transition-all text-[15px] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    Please wait...
-                  </>
-                ) : isLogin ? (
-                  "Sign In"
-                ) : (
-                  "Create Account"
-                )}
-              </button>
-            </div>
-          </form>
+          {isLogin ? (
+            <LoginForm 
+              formData={formData} 
+              setFormData={setFormData} 
+              loading={loading} 
+              onSubmit={handleLoginSubmit} 
+            />
+          ) : (
+            <RegisterForm 
+              formData={formData} 
+              setFormData={setFormData} 
+              loading={loading} 
+              onSubmit={handleRegisterSubmit} 
+              avatarPreview={avatarPreview}
+              handleFileChange={handleFileChange}
+            />
+          )}
 
           <div className="mt-8 text-center pt-6 border-t border-slate-200/60">
             <p className="text-[14px] text-slate-600 font-medium">
