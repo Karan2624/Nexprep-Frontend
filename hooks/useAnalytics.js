@@ -10,7 +10,6 @@ export default function useAnalytics() {
   const [lcPieData, setLcPieData] = useState([]);
   const [cfPieData, setCfPieData] = useState([]);
   const [lastSynced, setLastSynced] = useState("Just now");
-
   const [lcStats, setLcStats] = useState({});
   const [cfStats, setCfStats] = useState({});
   const [weakspots, setWeakspots] = useState({ list: [], insight: "" });
@@ -19,24 +18,15 @@ export default function useAnalytics() {
     setLoading(true);
     const data = await fetchAnalyticsData();
 
-    console.log("Analytics API Response:", data);
-    console.log("Radar Data:", data.radarData);
-    console.log("Topics Data:", data.topicsData);
-    console.log("LC Line Data:", data.lcLineData);
-    console.log("CF Line Data:", data.cfLineData);
-    console.log("LC Stats:", data.lcStats);
-    console.log("CF Stats:", data.cfStats);
-    console.log("Weakspots:", data.weakspots);
-
-    setRadarData(data.radarData);
-    setTopicsData(data.topicsData);
-    setLcLineData(data.lcLineData);
-    setCfLineData(data.cfLineData);
-    setLcPieData(data.lcPieData);
-    setCfPieData(data.cfPieData);
-    setLcStats(data.lcStats);
-    setCfStats(data.cfStats);
-    setWeakspots(data.weakspots);
+    setRadarData(data.radarData || []);
+    setTopicsData(data.topicsData || []);
+    setLcLineData(data.lcLineData || []);
+    setCfLineData(data.cfLineData || []);
+    setLcPieData(data.lcPieData || []);
+    setCfPieData(data.cfPieData || []);
+    setLcStats(data.lcStats || {});
+    setCfStats(data.cfStats || {});
+    setWeakspots(data.weakspots || { list: [], insight: "" });
     setLastSynced("Just now");
 
     setLoading(false);

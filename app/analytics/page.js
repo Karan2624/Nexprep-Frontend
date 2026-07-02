@@ -26,7 +26,8 @@ export default function AnalyticsPage() {
         onSync={analytics.fetchAnalytics}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* CHANGED: lg:grid-cols-3 is now lg:grid-cols-5 */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <SkillDistribution radarData={analytics.radarData} />
         <TopicMastery
           topicsData={analytics.topicsData}
@@ -34,6 +35,7 @@ export default function AnalyticsPage() {
         />
       </div>
 
+      {/* Leave the second row as is (or adjust similarly if you want ComfortZone to be smaller) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <TrajectoryVelocity
           lcLineData={analytics.lcLineData}
