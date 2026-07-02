@@ -80,7 +80,6 @@ export default function TrajectoryVelocity({
           <p className="text-[10px] text-slate-500 font-bold mb-1 leading-tight uppercase tracking-wider">Overall Status</p>
           <p className="text-[18px] font-black text-emerald-600 capitalize">{cfStats.status || 'N/A'}</p>
         </div>
-        <div></div>
         {/* <div className="hover:-translate-y-1 transition-transform">
           <p className="text-[10px] text-slate-500 font-bold mb-1 leading-tight uppercase tracking-wider">AI Confidence</p>
           <p className="text-[18px] font-black text-blue-600">
