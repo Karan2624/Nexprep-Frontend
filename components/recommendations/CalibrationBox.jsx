@@ -2,7 +2,7 @@ import { SlidersHorizontal } from "lucide-react";
 
 export default function CalibrationBox({ calibration }) {
   return (
-    <div className="bg-gradient-to-br from-[#F8FAFF] to-[#EBF2FC] border border-blue-100/50 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:shadow-md transition-shadow duration-300">
+    <div className="bg-linear-to-br from-[#F8FAFF] to-[#EBF2FC] border border-blue-100/50 rounded-xl p-6 relative overflow-hidden shadow-sm group hover:shadow-md transition-shadow duration-300">
       <div className="absolute right-4 top-6 text-blue-300 transition-transform duration-500 group-hover:rotate-180">
          <SlidersHorizontal size={36} strokeWidth={1} />
       </div>

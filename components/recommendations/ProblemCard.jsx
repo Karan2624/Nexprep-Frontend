@@ -2,7 +2,7 @@ import { ExternalLink, Target } from "lucide-react";
 
 export default function ProblemCard({ problem }) {
   return (
-    <div className="bg-gradient-to-br from-[#F8FAFF] to-[#EBF2FC] border border-blue-100/60 rounded-xl p-6 shadow-sm flex flex-col transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl hover:border-blue-300/60 group">
+    <div className="bg-linear-to-br from-[#F8FAFF] to-[#EBF2FC] border border-blue-100/60 rounded-xl p-6 shadow-sm flex flex-col transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl hover:border-blue-300/60 group">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-2 text-[13px] font-medium text-slate-600">
           <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors duration-300 ${problem.platformBg} ${problem.platformColor}`}>

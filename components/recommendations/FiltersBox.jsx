@@ -13,7 +13,7 @@ const DifficultyPill = ({ label, isActive, onClick }) => (
 
 export default function FiltersBox({ activeDifficulty, setActiveDifficulty }) {
   return (
-    <div className="bg-gradient-to-br from-[#F8FAFF] to-[#EBF2FC] border border-blue-100/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="bg-linear-to-br from-[#F8FAFF] to-[#EBF2FC] border border-blue-100/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
       <h2 className="text-lg font-bold text-slate-900 mb-4">Filters</h2>
       <hr className="border-blue-100/60 mb-6"/>
       
