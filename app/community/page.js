@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import { io } from 'socket.io-client'; // <-- 1. ADDED SOCKET.IO IMPORT
 
 import { api } from '../../lib/axios'; 
 import { useAuthStore } from '../../store/useAuthStore';
@@ -20,11 +21,108 @@ export default function CommunityPage() {
   const [groupChats, setGroupChats] = useState({});
   const [activeGroup, setActiveGroup] = useState(null);
   
+  // <-- 2. ADDED SOCKET STATE
+  const [socket, setSocket] = useState(null); 
+  
   const [communityTab, setCommunityTab] = useState('All Discussions');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // ==========================================
+  // SOCKET.IO: CONNECTION & SETUP
+  // ==========================================
+  useEffect(() => {
+    // 1. Remove the localStorage token search entirely!
+
+    // 2. Just connect and tell it to send the secure cookies
+    const newSocket = io(process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000", {
+      withCredentials: true // <-- This is the magic key for HTTP-Only cookies
+    });
+
+    newSocket.on("connect", () => {
+      console.log("✅ SOCKET CONNECTED TO BACKEND! ID:", newSocket.id);
+    });
+
+    newSocket.on("connect_error", (err) => {
+      console.error("❌ SOCKET CONNECTION REJECTED:", err.message);
+    });
+
+    setSocket(newSocket);
+
+    return () => newSocket.close();
+  }, []);
+
+  // ==========================================
+  // SOCKET.IO: JOIN/LEAVE ROOMS
+  // ==========================================
+  useEffect(() => {
+    if (socket && activeGroup) {
+      // Tell backend we entered the specific group room
+      socket.emit("joinGroup", activeGroup._id);
+
+      // Clean up: Leave the room if we close the chat or switch to another group
+      return () => {
+        socket.emit("leaveGroup", activeGroup._id);
+      };
+    }
+  }, [socket, activeGroup]);
+
+  // ==========================================
+  // SOCKET.IO: REAL-TIME LISTENERS
+  // ==========================================
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("receiveMessage", (newMessage) => {
+      console.log("🔥 REAL-TIME MESSAGE RECEIVED FROM SERVER!", newMessage);
+      setGroupChats((prev) => {
+        const currentMessages = prev[newMessage.groupId] || [];
+        
+        // Prevent seeing our own message twice (since the REST API also returns it)
+        if (currentMessages.some(m => m._id === newMessage._id)) return prev;
+
+        return {
+          ...prev,
+          [newMessage.groupId]: [...currentMessages, newMessage]
+        };
+      });
+    });
+
+    socket.on("updateMessage", (updatedMsg) => {
+      setGroupChats((prev) => {
+        const currentMessages = prev[updatedMsg.groupId] || [];
+        return {
+          ...prev,
+          [updatedMsg.groupId]: currentMessages.map(m => 
+            m._id === updatedMsg._id ? updatedMsg : m
+          )
+        };
+      });
+    });
+
+    socket.on("deleteMessage", (messageId) => {
+      setGroupChats((prev) => {
+        const nextState = { ...prev };
+        for (const groupId in nextState) {
+          nextState[groupId] = nextState[groupId].filter(m => m._id !== messageId);
+        }
+        return nextState;
+      });
+    });
+
+    // Clean up listeners so they don't multiply
+    return () => {
+      socket.off("receiveMessage");
+      socket.off("updateMessage");
+      socket.off("deleteMessage");
+    };
+  }, [socket]);
+
+
+  // ==========================================
+  // STANDARD API CALLS
+  // ==========================================
   useEffect(() => {
     fetchPosts();
     fetchGroups();
@@ -119,7 +217,7 @@ export default function CommunityPage() {
     catch (error) { fetchGroups(); }
   };
 
-const fetchGroupMessages = async (groupId) => {
+  const fetchGroupMessages = async (groupId) => {
     try {
       const res = await api.get(`/chat-message/${groupId}/message`);
     
@@ -142,7 +240,15 @@ const fetchGroupMessages = async (groupId) => {
   const handleSendGroupMessage = async (content) => {
     try {
       const res = await api.post(`/chat-message/${activeGroup._id}/send-message`, { content });
-      setGroupChats(prev => ({ ...prev, [activeGroup._id]: [...(prev[activeGroup._id] || []), res.data.data] }));
+       const newMsg = res.data.data;
+      setGroupChats(prev => {
+        const currentMessages = prev[activeGroup._id] || [];
+        if(currentMessages.some((m) => m._id===newMsg._id)){
+          return prev;
+        }
+
+        return {...prev,[activeGroup._id]:[...currentMessages,newMsg]};
+      });
     } catch (error) {
       console.error("Failed to send message:", error);
     }
