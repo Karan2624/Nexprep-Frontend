@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import { io } from 'socket.io-client'; // <-- 1. ADDED SOCKET.IO IMPORT
+import { io } from 'socket.io-client'; 
 
 import { api } from '../../lib/axios'; 
 import { useAuthStore } from '../../store/useAuthStore';
@@ -20,8 +20,7 @@ export default function CommunityPage() {
   const [studyGroups, setStudyGroups] = useState([]);
   const [groupChats, setGroupChats] = useState({});
   const [activeGroup, setActiveGroup] = useState(null);
-  
-  // <-- 2. ADDED SOCKET STATE
+
   const [socket, setSocket] = useState(null); 
   
   const [communityTab, setCommunityTab] = useState('All Discussions');
@@ -29,15 +28,12 @@ export default function CommunityPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ==========================================
-  // SOCKET.IO: CONNECTION & SETUP
-  // ==========================================
+  
   useEffect(() => {
-    // 1. Remove the localStorage token search entirely!
-
-    // 2. Just connect and tell it to send the secure cookies
+  
     const newSocket = io(process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000", {
-      withCredentials: true // <-- This is the magic key for HTTP-Only cookies
+      withCredentials: true,
+      transports: ["websocket"]
     });
 
     newSocket.on("connect", () => {
@@ -50,7 +46,11 @@ export default function CommunityPage() {
 
     setSocket(newSocket);
 
-    return () => newSocket.close();
+    return () => {
+      newSocket.off("connect");
+      newSocket.off("connect_error");
+      newSocket.disconnect();
+    };
   }, []);
 
   // ==========================================
