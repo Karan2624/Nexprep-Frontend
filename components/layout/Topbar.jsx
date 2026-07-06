@@ -1,6 +1,8 @@
 "use client";
 
-import { Bell, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import NotificationBell from './NotificationBell';
+
 
 export function Topbar({ setIsMobileMenuOpen }) {
   return (
@@ -16,14 +18,12 @@ export function Topbar({ setIsMobileMenuOpen }) {
       </div>
 
       <div className="flex items-center gap-2 md:gap-4 text-slate-600">
-        <button className="relative flex items-center justify-center w-10 h-10 text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition-colors rounded-full">
-          <Bell size={22} />
-
-          <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-        </button>
         
+        {/* 2. Drop the live component right here! */}
+        <NotificationBell />
+        
+        {/* User Profile Avatar */}
         <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-blue-600 to-indigo-600 overflow-hidden shadow-sm flex items-center justify-center text-white font-bold text-sm cursor-pointer ml-1 md:ml-2 hover:scale-105 transition-transform">
-
           US
         </div>
       </div>
