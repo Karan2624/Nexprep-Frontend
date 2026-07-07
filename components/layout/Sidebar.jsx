@@ -11,10 +11,10 @@ import {
   CheckSquare, 
   Building2, 
   LogOut,
-  X // NEW: Import the X icon for closing
+  X 
 } from 'lucide-react';
 
-// Reusable navigation item component (Now accepts an onClick prop)
+
 const SidebarItem = ({ icon: Icon, label, href, isActive, onClick }) => (
   <Link 
     href={href}
@@ -30,7 +30,7 @@ const SidebarItem = ({ icon: Icon, label, href, isActive, onClick }) => (
   </Link>
 );
 
-// NEW: Accept isOpen and setIsOpen as props
+
 export function Sidebar({ isOpen, setIsOpen }) {
   const pathname = usePathname();
   const router = useRouter(); 
@@ -48,8 +48,7 @@ export function Sidebar({ isOpen, setIsOpen }) {
     <aside className={`w-[280px] md:w-[300px] bg-white/95 md:bg-white/80 backdrop-blur-xl border-r border-slate-200 flex flex-col h-screen fixed md:sticky top-0 left-0 shrink-0 z-50 transition-transform duration-300 ease-in-out ${
       isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0 shadow-none"
     }`}>
-      
-      {/* Logo Area & Mobile Close Button */}
+ 
       <div className="px-6 py-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-blue-900 text-white flex items-center justify-center font-bold text-xl rounded-lg shadow-md animate-pop-in">
@@ -61,7 +60,7 @@ export function Sidebar({ isOpen, setIsOpen }) {
           </div>
         </div>
 
-        {/* NEW: Mobile Close Button */}
+
         <button 
           onClick={() => setIsOpen(false)}
           className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
@@ -70,7 +69,7 @@ export function Sidebar({ isOpen, setIsOpen }) {
         </button>
       </div>
 
-      {/* Navigation Links */}
+
       <nav className="flex-1 px-5 space-y-1 overflow-y-auto mt-2 custom-scrollbar">
         <SidebarItem 
            icon={LayoutDashboard} label="Dashboard" 
@@ -104,7 +103,7 @@ export function Sidebar({ isOpen, setIsOpen }) {
         />
       </nav>
 
-      {/* Footer Navigation / Logout */}
+
       <div className="p-5 space-y-2 mb-2 flex flex-col mt-auto border-t border-slate-100">
         <button 
           onClick={handleLogout} 
