@@ -1,4 +1,5 @@
 import { RefreshCw } from "lucide-react";
+import PlatformLinker from "../layout/PlatformLinker";
 
 export default function RecommendationHeader({ weakSpots, onSync, loading }) {
   return (
@@ -23,12 +24,13 @@ export default function RecommendationHeader({ weakSpots, onSync, loading }) {
         )}
       </div>
 
-      {/* Sync Button Container */}
-      <div className="flex items-center gap-3 shrink-0 mt-1">
+      <div className="flex flex-col items-start md:items-end gap-3 shrink-0 mt-1 w-full md:w-auto">
+        <PlatformLinker onSync={onSync} />
+
         <button 
           onClick={onSync}
           disabled={loading}
-          className="bg-[#EBF3FF] text-blue-700 hover:bg-blue-100 transition-colors px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0 group"
+          className="bg-[#EBF3FF] text-blue-700 hover:bg-blue-100 transition-colors px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0 group w-fit"
         >
           <RefreshCw 
             size={14} 

@@ -1,10 +1,9 @@
-import { Link2, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import PlatformLinker from "../layout/PlatformLinker";
 
 export default function AnalyticsHeader({ lastSynced, onSync }) {
   return (
     <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
-      
-      
       <div className="max-w-lg">
         <h1 className="text-3xl sm:text-4xl font-bold leading-tight">
           Performance Analytics
@@ -14,23 +13,9 @@ export default function AnalyticsHeader({ lastSynced, onSync }) {
         </p>
       </div>
 
-      
       <div className="flex flex-col items-start lg:items-end gap-3 w-full lg:w-auto">
-        
-        {/* Link badges */}
-        <div className="flex flex-wrap gap-3">
-          <div className="bg-[#FFA116] text-white px-4 py-2 rounded-full flex items-center gap-2 text-sm">
-            <Link2 size={14} />
-            LeetCode Linked
-          </div>
+        <PlatformLinker onSync={onSync} />
 
-          <div className="bg-[#1F8ACB] text-white px-4 py-2 rounded-full flex items-center gap-2 text-sm">
-            <Link2 size={14} />
-            Codeforces Linked
-          </div>
-        </div>
-
-        {/* Sync button */}
         <button
           onClick={onSync}
           className="bg-blue-100 px-4 py-2 rounded-lg flex items-center gap-2 w-fit"
