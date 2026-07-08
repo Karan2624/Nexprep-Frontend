@@ -8,9 +8,10 @@ import { AnimatedBackground } from "../components/ui/AnimatedBackground";
 import "./globals.css";
 
 export default function RootLayout({ children }) {
-  const { user, isCheckingAuth, checkAuth } = useAuthStore();
-  
-  // NEW: State to track if the mobile menu is open
+  const user = useAuthStore((state) => state.user);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {

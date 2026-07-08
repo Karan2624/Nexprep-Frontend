@@ -2,7 +2,7 @@
 
 import { Menu } from 'lucide-react';
 import NotificationBell from './NotificationBell';
-
+import ProfileMenu from './ProfileMenu';
 
 export function Topbar({ setIsMobileMenuOpen }) {
   return (
@@ -19,13 +19,10 @@ export function Topbar({ setIsMobileMenuOpen }) {
 
       <div className="flex items-center gap-2 md:gap-4 text-slate-600">
         
-        {/* 2. Drop the live component right here! */}
         <NotificationBell />
+       
+        <ProfileMenu />
         
-        {/* User Profile Avatar */}
-        <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-tr from-blue-600 to-indigo-600 overflow-hidden shadow-sm flex items-center justify-center text-white font-bold text-sm cursor-pointer ml-1 md:ml-2 hover:scale-105 transition-transform">
-          US
-        </div>
       </div>
       
     </header>
