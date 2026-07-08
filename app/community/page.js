@@ -53,24 +53,17 @@ export default function CommunityPage() {
     };
   }, []);
 
-  // ==========================================
-  // SOCKET.IO: JOIN/LEAVE ROOMS
-  // ==========================================
   useEffect(() => {
     if (socket && activeGroup) {
-      // Tell backend we entered the specific group room
+
       socket.emit("joinGroup", activeGroup._id);
 
-      // Clean up: Leave the room if we close the chat or switch to another group
       return () => {
         socket.emit("leaveGroup", activeGroup._id);
       };
     }
   }, [socket, activeGroup]);
 
-  // ==========================================
-  // SOCKET.IO: REAL-TIME LISTENERS
-  // ==========================================
   useEffect(() => {
     if (!socket) return;
 
@@ -78,8 +71,7 @@ export default function CommunityPage() {
       console.log("🔥 REAL-TIME MESSAGE RECEIVED FROM SERVER!", newMessage);
       setGroupChats((prev) => {
         const currentMessages = prev[newMessage.groupId] || [];
-        
-        // Prevent seeing our own message twice (since the REST API also returns it)
+
         if (currentMessages.some(m => m._id === newMessage._id)) return prev;
 
         return {
@@ -111,7 +103,6 @@ export default function CommunityPage() {
       });
     });
 
-    // Clean up listeners so they don't multiply
     return () => {
       socket.off("receiveMessage");
       socket.off("updateMessage");
@@ -120,9 +111,6 @@ export default function CommunityPage() {
   }, [socket]);
 
 
-  // ==========================================
-  // STANDARD API CALLS
-  // ==========================================
   useEffect(() => {
     fetchPosts();
     fetchGroups();

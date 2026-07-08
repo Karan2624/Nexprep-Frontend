@@ -74,7 +74,7 @@ export function Sidebar({ isOpen, setIsOpen }) {
         <SidebarItem 
            icon={LayoutDashboard} label="Dashboard" 
            href="/dashboard" isActive={pathname === '/dashboard'} 
-           onClick={() => setIsOpen(false)} // Closes menu on mobile when clicked
+           onClick={() => setIsOpen(false)} 
         />
         <SidebarItem 
            icon={Target} label="Recommendations" 
