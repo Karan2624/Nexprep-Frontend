@@ -86,7 +86,9 @@ export default function AuthPage() {
         submitData.append("avatar", formData.avatar);
       }
 
-      const res = await fetch("http://localhost:8000/api/v1/users/register", {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      const res = await fetch(`${API_URL}/api/v1/users/register`, {
         method: "POST",
         credentials: "include",
         body: submitData, 
