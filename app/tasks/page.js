@@ -10,7 +10,9 @@ import { Loader2 } from 'lucide-react';
 import TaskCompletionModal from '../../components/tasks/TaskCompletionModel';
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState([]);
+  // ⚡ Split state into 'allTasks' (for charts) and 'todayTasks' (for the list)
+  const [allTasks, setAllTasks] = useState([]);
+  const [todayTasks, setTodayTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completionModal, setCompletionModal] = useState({ isOpen: false, task: null });
@@ -22,8 +24,15 @@ export default function TasksPage() {
   const fetchTasks = async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const response = await api.get(`/dailyTask/list?date=${today}`);
-      setTasks(response.data.data || []);
+      
+      // ⚡ Fetch both endpoints simultaneously for performance
+      const [allResponse, todayResponse] = await Promise.all([
+        api.get("/dailyTask/list"),
+        api.get(`/dailyTask/list?date=${today}`)
+      ]);
+
+      setAllTasks(allResponse.data.data || []);
+      setTodayTasks(todayResponse.data.data || []);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
     } finally {
@@ -40,10 +49,18 @@ export default function TasksPage() {
         estimatedMinutes: parseInt(newTaskData.estimatedMinutes)
       });
 
+      const newTask = response.data.data;
       const today = new Date().toISOString().split('T')[0];
+      
+      // Target date from DB might be full ISO string, extract just the YYYY-MM-DD
+      const taskDate = new Date(newTask.targetDate).toISOString().split('T')[0];
 
-      if (newTaskData.targetDate === today) {
-        setTasks(prev => [...prev, response.data.data]);
+      // ⚡ Always add to allTasks for the charts
+      setAllTasks(prev => [...prev, newTask]);
+
+      // ⚡ Only add to todayTasks if the target date is actually today
+      if (taskDate === today) {
+        setTodayTasks(prev => [...prev, newTask]);
       }
 
       return true;
@@ -55,20 +72,22 @@ export default function TasksPage() {
   };
 
   const handleDeleteTask = async (taskId) => {
-    const previousTasks = [...tasks];
-
-    setTasks(tasks.filter(task => task._id !== taskId));
+    // ⚡ Optimistically remove from both arrays
+    setAllTasks(prev => prev.filter(task => task._id !== taskId));
+    setTodayTasks(prev => prev.filter(task => task._id !== taskId));
 
     try {
       await api.delete(`/dailyTask/delete-task/${taskId}`);
     } catch (error) {
       console.error("Failed to delete task", error);
-      setTasks(previousTasks);
+      // If it fails, refresh from server to restore accurate state
+      fetchTasks();
     }
   };
 
   const handleToggleTask = (taskId) => {
-    const task = tasks.find(t => t._id === taskId);
+    // Check todayTasks first, fallback to allTasks if needed
+    const task = todayTasks.find(t => t._id === taskId) || allTasks.find(t => t._id === taskId);
 
     if (!task || task.isCompleted) return;
 
@@ -86,8 +105,8 @@ export default function TasksPage() {
         timeTaken
       });
 
-      setTasks(
-        tasks.map(t =>
+      const updateTaskInArray = (tasksArray) => 
+        tasksArray.map(t =>
           t._id === taskId
             ? {
                 ...t,
@@ -95,8 +114,11 @@ export default function TasksPage() {
                 timeSpentMinutes: timeTaken
               }
             : t
-        )
-      );
+        );
+
+      // ⚡ Update completion status in both arrays
+      setAllTasks(prev => updateTaskInArray(prev));
+      setTodayTasks(prev => updateTaskInArray(prev));
 
       setCompletionModal({
         isOpen: false,
@@ -120,19 +142,10 @@ export default function TasksPage() {
     );
   }
 
-  const totalEstimated = tasks.reduce(
-    (acc, t) => acc + t.estimatedMinutes,
-    0
-  );
-
-  const totalSpent = tasks.reduce(
-    (acc, t) => acc + t.timeSpentMinutes,
-    0
-  );
-
-  const completedCount = tasks.filter(
-    t => t.isCompleted
-  ).length;
+  // ⚡ The top header metrics should reflect TODAY'S progress
+  const totalEstimated = todayTasks.reduce((acc, t) => acc + t.estimatedMinutes, 0);
+  const totalSpent = todayTasks.reduce((acc, t) => acc + t.timeSpentMinutes, 0);
+  const completedCount = todayTasks.filter(t => t.isCompleted).length;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -149,16 +162,16 @@ export default function TasksPage() {
         <div className="flex gap-4 w-full md:w-auto">
           <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm shadow-sm flex flex-col flex-1 md:flex-auto items-end">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Progress
+              Today's Progress
             </span>
             <span className="font-bold text-slate-900">
-              {completedCount} / {tasks.length} Done
+              {completedCount} / {todayTasks.length} Done
             </span>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm shadow-sm flex flex-col flex-1 md:flex-auto items-end">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Time
+              Today's Time
             </span>
             <span className="font-bold text-slate-900">
               {totalSpent} / {totalEstimated} mins
@@ -167,9 +180,9 @@ export default function TasksPage() {
         </div>
       </div>
 
-      <TaskStatsCards tasks={tasks} />
-
-      <TaskCharts tasks={tasks} />
+      {/* ⚡ Pass allTasks to the Stats and Charts */}
+      <TaskStatsCards tasks={allTasks} />
+      <TaskCharts tasks={allTasks} />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-1">
@@ -180,8 +193,9 @@ export default function TasksPage() {
         </div>
 
         <div className="xl:col-span-2">
+          {/* ⚡ Pass ONLY todayTasks to the Task List */}
           <TaskList
-            tasks={tasks}
+            tasks={todayTasks}
             onToggleTask={handleToggleTask}
             onDeleteTask={handleDeleteTask}
           />
