@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 import { api } from "../lib/axios";
 
@@ -28,17 +27,18 @@ export const useAuthStore = create((set) => ({
       };
     }
   },
+  
   logout: async () => {
-      try {
-
-        await api.post("/users/logout"); 
-
-        set({ user: null }); 
-        
-        return { success: true };
-      } catch (error) {
-        console.error("Logout failed", error);
-        return { success: false };
+    try {
+      await api.post("/users/logout"); 
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      // ⚡ THE FIX: Always wipe the user state and force a redirect
+      set({ user: null }); 
+      if (typeof window !== "undefined") {
+         window.location.href = "/";
       }
-    },
+    }
+  },
 }));
