@@ -87,8 +87,9 @@ export default function AuthPage() {
       }
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      
 
-      const res = await fetch(`${API_URL}/api/v1/users/register`, {
+      const res = await fetch(`${API_URL}/users/register`, {
         method: "POST",
         credentials: "include",
         body: submitData, 
