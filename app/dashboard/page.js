@@ -11,7 +11,8 @@ import ActionSidebar from '../../components/dashboard/ActionSidebar';
 import ActivityHeatmap from '../../components/dashboard/ActivityHeatmap';
 
 export default function Dashboard() {
-  const { user } = useAuthStore();
+  // ⚡ 1. Added isCheckingAuth here
+  const { user, isCheckingAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [tasks, setTasks] = useState([]);
   const [updates, setUpdates] = useState([]);
@@ -62,7 +63,8 @@ export default function Dashboard() {
     catch { setTasks(tasks.map(t => t._id === taskId ? { ...t, isCompleted: !t.isCompleted } : t)); }
   };
 
-  if (isLoading) return <div className="flex h-screen items-center justify-center"><Loader2 size={40} className="animate-spin text-blue-600" /></div>;
+  // ⚡ 2. Added isCheckingAuth to the loading screen logic here
+  if (isLoading || isCheckingAuth) return <div className="flex h-screen items-center justify-center"><Loader2 size={40} className="animate-spin text-blue-600" /></div>;
 
   return (
     <div className="space-y-6">
