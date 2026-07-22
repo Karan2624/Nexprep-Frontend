@@ -31,10 +31,13 @@ export default function CommunityPage() {
   
   useEffect(() => {
   
-    const newSocket = io(process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000", {
-      withCredentials: true,
-      transports: ["websocket"]
-    });
+  const SOCKET_URL = process.env.NODE_ENV === "production" 
+    ? "https://nexprep-backend-1.onrender.com" 
+    : "http://localhost:8000";
+
+  const newSocket = io(SOCKET_URL, {
+    withCredentials: true,
+  });
 
     newSocket.on("connect", () => {
       console.log("✅ SOCKET CONNECTED TO BACKEND! ID:", newSocket.id);
