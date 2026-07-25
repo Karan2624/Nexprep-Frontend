@@ -30,29 +30,47 @@ export default function CommunityPage() {
 
   
   useEffect(() => {
-  
-  const SOCKET_URL = process.env.NODE_ENV === "production" 
-    ? "https://nexprep-backend-1.onrender.com" 
-    : "http://localhost:8000";
+    let newSocket;
 
-  const newSocket = io(SOCKET_URL, {
-    withCredentials: true,
-  });
+    const connectSocket = async () => {
+      try {
+        
+        const res = await api.get('/users/socket-token');
+        const token = res.data.accessToken;
 
-    newSocket.on("connect", () => {
-      console.log("✅ SOCKET CONNECTED TO BACKEND! ID:", newSocket.id);
-    });
+      
+        const SOCKET_URL = process.env.NODE_ENV === "production" 
+          ? "https://nexprep-backend-1.onrender.com" 
+          : "http://localhost:8000";
 
-    newSocket.on("connect_error", (err) => {
-      console.error("❌ SOCKET CONNECTION REJECTED:", err.message);
-    });
+        newSocket = io(SOCKET_URL, {
+          auth: { token: token }, 
+          withCredentials: true,
 
-    setSocket(newSocket);
+        });
+
+        newSocket.on("connect", () => {
+          console.log("✅ SOCKET CONNECTED TO BACKEND! ID:", newSocket.id);
+        });
+
+        newSocket.on("connect_error", (err) => {
+          console.error("❌ SOCKET CONNECTION REJECTED:", err.message);
+        });
+
+        setSocket(newSocket);
+      } catch (error) {
+        console.error("❌ Failed to fetch socket token", error);
+      }
+    };
+
+    connectSocket();
 
     return () => {
-      newSocket.off("connect");
-      newSocket.off("connect_error");
-      newSocket.disconnect();
+      if (newSocket) {
+        newSocket.off("connect");
+        newSocket.off("connect_error");
+        newSocket.disconnect();
+      }
     };
   }, []);
 
