@@ -1,15 +1,17 @@
+import { useState } from 'react';
 import { Code, Flame, Zap } from 'lucide-react';
 
 export default function StatCards({ user, lcStats, cfStats, weakspots }) {
+  const [expandedSpot, setExpandedSpot] = useState(null);
   const totalSolved = (lcStats?.total || 0) + (cfStats?.total || 0);
   const lcPercent = totalSolved > 0 ? Math.round((lcStats?.total / totalSolved) * 100) : 50;
   const cfPercent = totalSolved > 0 ? Math.round((cfStats?.total / totalSolved) * 100) : 50;
-  
+
   const cardStyle = "bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] rounded-2xl p-6 transition-all duration-300 hover:bg-white/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1";
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+
       {/* Active Streak */}
       <div className={cardStyle}>
         <div className="flex justify-between items-start mb-2">
@@ -34,7 +36,7 @@ export default function StatCards({ user, lcStats, cfStats, weakspots }) {
             <Code size={20} />
           </div>
         </div>
-        <div className="flex items-center gap-5 mt-2">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 mt-2">
           <div className="relative w-16 h-16 shrink-0 drop-shadow-sm">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="rgba(255,255,255,0.5)" strokeWidth="4" />
@@ -45,7 +47,7 @@ export default function StatCards({ user, lcStats, cfStats, weakspots }) {
               <span className="text-base font-black text-slate-900 leading-none">{totalSolved}</span>
             </div>
           </div>
-          <div className="flex flex-col justify-center gap-2 flex-1">
+          <div className="flex flex-col justify-center gap-2 flex-1 w-full sm:w-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#FFA116]"></div>
@@ -74,10 +76,17 @@ export default function StatCards({ user, lcStats, cfStats, weakspots }) {
         </div>
         <div className="text-[20px] font-black text-slate-900 mt-1 leading-none tracking-tight">Weak Spots</div>
         {weakspots?.list && weakspots.list.length > 0 ? (
-          <div className="flex gap-1.5 mt-auto pt-2">
+          <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
             {weakspots.list.slice(0, 3).map((spot, i) => (
-              <div key={i} title={spot.suggestion || "Focus on this topic"} className="bg-white/60 border border-purple-100 rounded-lg p-2 flex flex-col items-center flex-1 min-w-0 shadow-sm cursor-help hover:bg-white/90 transition-colors">
-                <span className="text-[9px] font-black text-purple-600 uppercase tracking-tight text-center truncate w-full">{spot.topic}</span>
+              <div 
+                key={i} 
+                title={`${spot.topic}\n\n${spot.suggestion || "Focus on this topic"}`} 
+                onClick={() => setExpandedSpot(expandedSpot === i ? null : i)}
+                className="bg-white/60 border border-purple-100 rounded-lg p-2 flex flex-col items-center flex-1 min-w-0 shadow-sm cursor-pointer hover:bg-white/90 transition-colors"
+              >
+                <span className={`text-[9px] font-black text-purple-600 uppercase tracking-tight text-center w-full transition-all duration-200 ${expandedSpot === i ? 'whitespace-normal break-words' : 'truncate'}`}>
+                  {spot.topic}
+                </span>
                 <span className="text-[11px] font-bold text-purple-900 mt-0.5">{spot.mastery !== undefined ? `${Math.round(spot.mastery * 100)}%` : 'Review'}</span>
               </div>
             ))}
