@@ -149,7 +149,7 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4 gap-4">
         <div>
           <h1 className="text-[32px] font-bold text-slate-900 mb-2">
             Daily Tasks
@@ -159,8 +159,8 @@ export default function TasksPage() {
           </p>
         </div>
 
-        <div className="flex gap-4 w-full md:w-auto">
-          <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm shadow-sm flex flex-col flex-1 md:flex-auto items-end">
+        <div className="flex gap-4 w-full lg:w-auto">
+          <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm shadow-sm flex flex-col flex-1 lg:flex-auto items-end">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Today's Progress
             </span>
@@ -169,7 +169,7 @@ export default function TasksPage() {
             </span>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm shadow-sm flex flex-col flex-1 md:flex-auto items-end">
+          <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm shadow-sm flex flex-col flex-1 lg:flex-auto items-end">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Today's Time
             </span>

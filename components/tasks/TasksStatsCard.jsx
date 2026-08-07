@@ -75,7 +75,7 @@ export default function TaskStatsCards({ tasks }) {
   const isFaster = timeDiff >= 0;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm flex flex-col justify-between">
         <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
           Overall Progress
