@@ -1,7 +1,14 @@
 import React from 'react';
 import { CheckSquare, Check, Clock, Trash2 } from 'lucide-react';
 
-export default function TaskList({ tasks, onToggleTask, onDeleteTask }) {
+export default function TaskList({ 
+  tasks, 
+  onToggleTask, 
+  onDeleteTask, 
+  title = "Today's Focus", 
+  showDate = true, 
+  emptyMessage = "No tasks scheduled for today. Take a break or add one!" 
+}) {
   const getTypeStyle = (type) => {
     switch (type) {
       case 'Coding':
@@ -31,14 +38,16 @@ export default function TaskList({ tasks, onToggleTask, onDeleteTask }) {
   return (
     <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
       <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-        <h3 className="font-bold text-slate-900">Today's Focus</h3>
-        <span className="text-xs font-semibold text-slate-500">
-          {new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'short',
-            day: 'numeric'
-          })}
-        </span>
+        <h3 className="font-bold text-slate-900">{title}</h3>
+        {showDate && (
+          <span className="text-xs font-semibold text-slate-500">
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'short',
+              day: 'numeric'
+            })}
+          </span>
+        )}
       </div>
 
       <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -48,7 +57,7 @@ export default function TaskList({ tasks, onToggleTask, onDeleteTask }) {
               size={40}
               className="mx-auto mb-3 text-slate-300"
             />
-            <p>No tasks scheduled for today. Take a break or add one!</p>
+            <p>{emptyMessage}</p>
           </div>
         ) : (
           tasks.map((task) => (

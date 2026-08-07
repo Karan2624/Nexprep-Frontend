@@ -13,6 +13,7 @@ export default function TasksPage() {
   // ⚡ Split state into 'allTasks' (for charts) and 'todayTasks' (for the list)
   const [allTasks, setAllTasks] = useState([]);
   const [todayTasks, setTodayTasks] = useState([]);
+  const [pendingTasks, setPendingTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completionModal, setCompletionModal] = useState({ isOpen: false, task: null });
@@ -25,14 +26,16 @@ export default function TasksPage() {
     try {
       const today = new Date().toISOString().split('T')[0];
       
-      // ⚡ Fetch both endpoints simultaneously for performance
-      const [allResponse, todayResponse] = await Promise.all([
+      // ⚡ Fetch all endpoints simultaneously for performance
+      const [allResponse, todayResponse, pendingResponse] = await Promise.all([
         api.get("/dailyTask/list"),
-        api.get(`/dailyTask/list?date=${today}`)
+        api.get(`/dailyTask/list?date=${today}`),
+        api.get("/dailyTask/pending-previous")
       ]);
 
       setAllTasks(allResponse.data.data || []);
       setTodayTasks(todayResponse.data.data || []);
+      setPendingTasks(pendingResponse.data.data || []);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
     } finally {
@@ -72,9 +75,10 @@ export default function TasksPage() {
   };
 
   const handleDeleteTask = async (taskId) => {
-    // ⚡ Optimistically remove from both arrays
+    // ⚡ Optimistically remove from all arrays
     setAllTasks(prev => prev.filter(task => task._id !== taskId));
     setTodayTasks(prev => prev.filter(task => task._id !== taskId));
+    setPendingTasks(prev => prev.filter(task => task._id !== taskId));
 
     try {
       await api.delete(`/dailyTask/delete-task/${taskId}`);
@@ -86,8 +90,10 @@ export default function TasksPage() {
   };
 
   const handleToggleTask = (taskId) => {
-    // Check todayTasks first, fallback to allTasks if needed
-    const task = todayTasks.find(t => t._id === taskId) || allTasks.find(t => t._id === taskId);
+    // Check todayTasks first, then pendingTasks, fallback to allTasks
+    const task = todayTasks.find(t => t._id === taskId) || 
+                 pendingTasks.find(t => t._id === taskId) || 
+                 allTasks.find(t => t._id === taskId);
 
     if (!task || task.isCompleted) return;
 
@@ -116,9 +122,10 @@ export default function TasksPage() {
             : t
         );
 
-      // ⚡ Update completion status in both arrays
+      // ⚡ Update completion status in all arrays
       setAllTasks(prev => updateTaskInArray(prev));
       setTodayTasks(prev => updateTaskInArray(prev));
+      setPendingTasks(prev => updateTaskInArray(prev));
 
       setCompletionModal({
         isOpen: false,
@@ -192,9 +199,23 @@ export default function TasksPage() {
           />
         </div>
 
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2 flex flex-col gap-6">
+          {pendingTasks.length > 0 && (
+            <TaskList
+              title="Overdue Tasks"
+              showDate={false}
+              emptyMessage="No overdue tasks!"
+              tasks={pendingTasks}
+              onToggleTask={handleToggleTask}
+              onDeleteTask={handleDeleteTask}
+            />
+          )}
+
           {/* ⚡ Pass ONLY todayTasks to the Task List */}
           <TaskList
+            title="Today's Focus"
+            showDate={true}
+            emptyMessage="No tasks scheduled for today. Take a break or add one!"
             tasks={todayTasks}
             onToggleTask={handleToggleTask}
             onDeleteTask={handleDeleteTask}
