@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { api } from '../../lib/axios'; 
+import { api } from '../../lib/axios';
 import { useAuthStore } from '../../store/useAuthStore';
 import WelcomeBanner from '../../components/dashboard/WelcomeBanner';
 import StatCards from '../../components/dashboard/StatCards';
@@ -11,7 +11,7 @@ import ActionSidebar from '../../components/dashboard/ActionSidebar';
 import ActivityHeatmap from '../../components/dashboard/ActivityHeatmap';
 
 export default function Dashboard() {
-  // ⚡ 1. Added isCheckingAuth here
+
   const { user, isCheckingAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [tasks, setTasks] = useState([]);
@@ -32,9 +32,9 @@ export default function Dashboard() {
         api.get('/leetcodeStat'),
         api.get('/codeforcesStat/me'),
         api.get('/recommendations/leetcode/weakspots'),
-        api.get('/dailyTask/list',{
-          params :{
-            date : todayDate
+        api.get('/dailyTask/list', {
+          params: {
+            date: todayDate
           }
         }),
         api.get('/notification/get-notifications')
@@ -42,7 +42,7 @@ export default function Dashboard() {
 
       if (lcRes.status === 'fulfilled' && lcRes.value.data.data) {
         const d = lcRes.value.data.data;
-        setLcStats({ handle: d.username, rating: Math.round(d.contestRating), rank: d.ranking, total: d.totalSolved });
+        setLcStats({ handle: d.username, rating: Math.round(d.contestRating), rank: d.contestGlobalRanking, total: d.totalSolved });
       }
       if (cfRes.status === 'fulfilled' && cfRes.value.data.data) {
         const d = cfRes.value.data.data;
@@ -59,11 +59,10 @@ export default function Dashboard() {
 
   const handleToggleTask = async (taskId) => {
     setTasks(tasks.map(t => t._id === taskId ? { ...t, isCompleted: !t.isCompleted } : t));
-    try { await api.patch(`/daily-task/complete-task/${taskId}`, { timeTaken: 30 }); } 
+    try { await api.patch(`/dailyTask/complete-task/${taskId}`, { timeTaken: 30 }); }
     catch { setTasks(tasks.map(t => t._id === taskId ? { ...t, isCompleted: !t.isCompleted } : t)); }
   };
 
-  // ⚡ 2. Added isCheckingAuth to the loading screen logic here
   if (isLoading || isCheckingAuth) return <div className="flex h-screen items-center justify-center"><Loader2 size={40} className="animate-spin text-blue-600" /></div>;
 
   return (
